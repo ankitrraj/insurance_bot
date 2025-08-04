@@ -1,0 +1,52 @@
+Golden Shield
+        c.  Fees charged by surgeon, anesthetist,  applied incase voluntary deductible has been 
+medical practitioner opted for. 
+        d.  Investigation expenses       v.  Base Co-payment shall be applicable on the 
+      iii.  Zone based co-payment shall be applicable in   amount payable by Us and our liability to 
+all cases (Except medically necessary  make payment shall than be arrived at.
+treatment for road traffic accidents) where        vi.  In case, the claim is for a Procedure/Medical 
+treatment is taken in a zone higher than for  Condition/Ailment/Disease which is subject to 
+which premium was paid for sub-limits as per policy terms and conditions, 
+      iv.  The voluntary deductible shall be applied to  the claim will be settled to the extent of 
+aggregate of all claims that are either paid or  amount which is lesser of the three amounts – 
+payable (not excluded) under this policy. Our  i.e. claimed amount or maximum amount as 
+liability to make payment shall commence only  per sub-limits applicable or ICICI Lombard 
+once the aggregate amount of all claims  Liability after deduction of base co-payment/ 
+payable or paid exceed the voluntary  voluntary deductible.
+deductible. Base Co-payment shall not be 
+Illustrations for claim settlement
+Illustration 1 - Insured Person opted for base co-payment
+Heading Particulars Scenario 1 Scenario 2 Scenario 3
+A. Annual Sum Insured ` 10,00,000 ` 10,00,000 ` 10,00,000
+B. Base Co-payment opted at time of policy issuance 20% 20% 20%
+Zone opted B (Goa) B (Goa) B (Goa)
+Hospitalization Diagnosis Heart Attack/  Heart Attack/  Heart Attack/ 
+PTCA done/  PTCA done/  PTCA done/ 
+Cardiovascular  Cardiovascular  Cardiovascular 
+disease disease disease
+Treatment taken in Goa (Zone B) Mumbai (Zone A) Guwahati (Zone C)
+C. Hospitalisation expenses Amount ` 4,00,000 ` 5,00,000 ` 3,00,000
+D. Pre and Post hospitalisation expenses ` 35,000 ` 50,000 ` 20,000
+E. Total claimed Expenses*[C+D] ` 4,35,000 ` 5,50,000 ` 3,20,000
+F. Zone based co-payment 0% 15% 0%
+G. Claimed amount after application of zone based co-payment  ` 4,35,000 ` 4,67,500 ` 3,20,000
+[E*F]
+H. Sub-limit for cardiovascular diseases  ` 3,50,000  ` 3,50,000  ` 3,50,000
+I. Insured Person liability after application of base co-payment   ` 87,000  ` 93,500  ` 64,000
+[G*B]
+J. ICICI Lombard Liability after deduction of co-payment [G-I]  ` 3,48,000  ` 3,74,000  ` 2,56,000
+K. Final payable amount to Insured Person [lesser amount out of G, H, J]  ` 3,48,000  ` 3,50,000  ` 2,56,000
+L. Balance Annual Sum Insured [A-K]  ` 6,52,000  ` 6,50,000  ` 7,44,000
+*It has been assumed that total claimed expenses are same as total payable expenses. i.e. there are no deductions in the claimed amount.
+Illustration 2 - Insured person opted for voluntary deductible
+Heading Particulars Scenario 1 Scenario 2 Scenario 3
+A. Annual Sum Insured ` 20,00,000 ` 20,00,000 ` 20,00,000
+B. Voluntary deductible opted at time of policy issuance ` 4,00,000 ` 4,00,000 ` 4,00,000
+C. Base Co-payment applicable NA NA NA
+Zone opted B (Goa) B (Goa) B (Goa)
+Hospitalization Diagnosis Heart Attack/  Heart Attack/  Heart Attack/ 
+PTCA done/  PTCA done/  PTCA done/ 
+Cardiovascular  Cardiovascular  Cardiovascular 
+disease disease disease
+Treatment taken in Goa  (Zone B) Mumbai (Zone A) Guwahati (Zone C)
+UIN : ICIHLIP22012V012223 27 CIN: L67200MH2000PLC129408

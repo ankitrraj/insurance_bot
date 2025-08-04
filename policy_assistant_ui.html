@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolicyGPT - AI Insurance Policy Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #36D1DC, #5B86E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            font-size: 28px;
+            margin-right: 5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #36D1DC;
+        }
+
+        .hero {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #36D1DC, #5B86E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 600px;
+            margin-bottom: 40px;
+            color: #cccccc;
+        }
+
+        .floating-document {
+            position: absolute;
+            width: 180px;
+            height: 220px;
+            background: linear-gradient(135deg, rgba(54, 209, 220, 0.2), rgba(91, 134, 229, 0.2));
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(54, 209, 220, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: perspective(800px) rotateY(15deg) rotateX(5deg);
+            transition: transform 0.5s;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            right: 15%;
+            top: 50%;
+            margin-top: -110px;
+        }
+
+        .floating-document:hover {
+            transform: perspective(800px) rotateY(-5deg) rotateX(-5deg) translateY(-10px);
+        }
+
+        .floating-document .doc-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #36D1DC;
+        }
+
+        .floating-document .doc-text {
+            font-size: 12px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(54, 209, 220, 0.2);
+            border-radius: 50px;
+            overflow: hidden;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .search-bar:hover, .search-bar:focus-within {
+            box-shadow: 0 15px 40px rgba(54, 209, 220, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 20px 25px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-bar input::placeholder {
+            color: #999999;
+        }
+
+        .search-bar .mic-icon {
+            cursor: pointer;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            color: #36D1DC;
+        }
+
+        .search-button {
+            padding: 0 30px;
+            background: linear-gradient(45deg, #36D1DC, #5B86E5);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .search-button:hover {
+            opacity: 0.9;
+        }
+
+        .results-container {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 50px;
+        }
+
+        .results-container h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #36D1DC;
+        }
+
+        .matches {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .match-card {
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s;
+            display: flex;
+            gap: 15px;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .match-icon {
+            font-size: 24px;
+            color: #5B86E5;
+        }
+
+        .match-content h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .match-content p {
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        .match-score {
+            margin-left: auto;
+            color: #36D1DC;
+            font-weight: 600;
+        }
+
+        .ai-answer {
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ai-answer pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: perspective(800px) rotateY(0deg);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: perspective(800px) rotateY(5deg) translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #36D1DC, #5B86E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        footer {
+            background: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 30px 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #999999;
+            font-size: 14px;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: #36D1DC;
+            text-decoration: none;
+        }
+
+        /* For small screens */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .floating-document {
+                display: none;
+            }
+            
+            .features {
+                gap: 20px;
+            }
+            
+            .feature-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars Background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo"><span>🔍</span> PolicyGPT</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Docs</a>
+            <a href="#">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>AI-Powered Insurance Policy Assistant</h1>
+        <p>Get instant answers to your insurance questions using advanced semantic search and AI technology</p>
+        
+        <div class="floating-document">
+            <div class="doc-icon">📄</div>
+            <div class="doc-text">Insurance Policy</div>
+            <div class="doc-text">Semantic Analysis</div>
+        </div>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="search-bar">
+            <input type="text" id="query-input" placeholder="Ask anything about your policy..." />
+            <div class="mic-icon">🎤</div>
+            <button class="search-button" id="search-btn">Ask</button>
+        </div>
+    </div>
+
+    <!-- Results Container -->
+    <div class="results-container" id="results">
+        <h2>Search Results</h2>
+        
+        <div class="matches">
+            <div class="match-card">
+                <div class="match-icon">📄</div>
+                <div class="match-content">
+                    <h3>Policy Definitions - doc1.txt_chunk10.txt</h3>
+                    <p>Deductible refers to the fixed amount that the insured person must pay before the insurance company starts covering the expenses. Co-payment is a percentage of the claim amount...</p>
+                </div>
+                <div class="match-score">92%</div>
+            </div>
+            
+            <div class="match-card">
+                <div class="match-icon">📄</div>
+                <div class="match-content">
+                    <h3>Coverage Details - doc2.txt_chunk15.txt</h3>
+                    <p>Premium: The amount paid by the policyholder to the insurance company for providing insurance coverage. It can be paid monthly, quarterly, or annually.</p>
+                </div>
+                <div class="match-score">78%</div>
+            </div>
+            
+            <div class="match-card">
+                <div class="match-icon">📄</div>
+                <div class="match-content">
+                    <h3>Claims Process - doc3.txt_chunk22.txt</h3>
+                    <p>Coverage limit: The maximum amount an insurance company will pay toward a covered loss. Once this limit is reached, the policyholder must pay all additional costs.</p>
+                </div>
+                <div class="match-score">65%</div>
+            </div>
+        </div>
+        
+        <div class="ai-answer">
+            <h2>AI Answer</h2>
+            <pre>{
+  "decision": "Need more info",
+  "justification": "Based on the policy clauses, deductibles and co-payments are standard cost-sharing mechanisms. A deductible is a fixed amount you pay before insurance coverage begins, while a co-payment is a percentage of each claim.",
+  "amount": "N/A (depends on specific policy terms)",
+  "next_steps": "Check your specific policy document for the exact deductible amount and co-payment percentage applicable to your plan."
+}</pre>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3 class="feature-title">Semantic Search</h3>
+            <p class="feature-desc">Our advanced AI scans through all 222 policy document chunks to find the most relevant information for your question.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3 class="feature-title">AI Understanding</h3>
+            <p class="feature-desc">Powered by Gemini AI, our system understands the context of your question and provides clear, accurate answers.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3 class="feature-title">Expert Recommendations</h3>
+            <p class="feature-desc">Get actionable insights and next steps based on your policy coverage and specific situation.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Powered by ChromaDB, Sentence Transformers, and Gemini API</p>
+        <p>© 2023 PolicyGPT - Insurance Policy AI Assistant</p>
+        <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a></p>
+    </footer>
+
+    <script>
+        // Generate stars for background
+        function generateStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const x = Math.floor(Math.random() * window.innerWidth);
+                const y = Math.floor(Math.random() * window.innerHeight);
+                
+                // Random size
+                const size = Math.random() * 2;
+                
+                // Random animation delay
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${x}px`;
+                star.style.top = `${y}px`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Show/hide results
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const query = document.getElementById('query-input').value;
+            if (query.trim() !== '') {
+                document.getElementById('results').style.display = 'block';
+                // Scroll to results
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        
+        // Initialize
+        window.onload = function() {
+            generateStars();
+        };
+    </script>
+</body>
+</html>

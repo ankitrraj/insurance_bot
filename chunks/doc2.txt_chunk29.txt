@@ -1,0 +1,76 @@
+Golden Shield
+Illustrations for claim settlement  (Contd.)
+Illustration 2 - Insured person opted for voluntary deductible (Contd.)
+Heading Particulars Scenario 1 Scenario 2 Scenario 3
+D. Hospitalisation expenses Amount ` 4,00,000 ` 5,00,000 ` 3,00,000
+E. Pre and Post hospitalisation expenses ` 35,000 ` 50,000 ` 20,000
+F. Total claimed Expenses*[D+E] ` 4,35,000 ` 5,50,000 ` 3,20,000
+G. Zone based co-payment 0% 15% 0%
+H. Claimed amount after application of zone based co-payment  ` 4,35,000 ` 4,67,500 ` 3,20,000
+[F*G]
+I. IL Liability after application of voluntary deductible [H-B]  ` 35,000  ` 67,500 NA as 
+expenses have 
+not crossed 
+voluntary 
+deductible 
+amount
+J. Sub-limit for cardiovascular diseases  ` 3,50,000  ` 3,50,000  ` 3,50,000
+K. Final payable amount to Insured Person [lesser amount out of I,J]  ` 35,000  ` 67,500 -
+L. Balance Annual Sum Insured [A-K]  ` 19,65,000  ` 19,32,500  ` 20,00,000
+*It has been assumed that total claimed expenses are same as total payable expenses. i.e. there are no deductions in the claimed amount.
+The claim amount assessed above would be deducted from the  authorization by providing Your Policy number and ID 
+following amounts in the following progressive order: proof to the hospital who can co-ordinate with Our 
+1.  Annual Sum Insured claim team to provide cashless facility. We will consider 
+Your request after having obtained accurate and 
+2.  Additional Sum Insured/Cumulative Bonus (if accrued and 
+complete information for the Illness or Injury for which 
+available)
+cashless Hospitalization facility is sought by You and 
+3.  Reset Sum Insured (If applicable)
+We will confirm Your request in writing.
+Further, upon the discovery or happening of any Illness or Injury 
+  B.  For Reimbursement Settlement
+that may give rise to a Claim under this Policy, then as a 
+    i.  You shall give notice to Us or Our in house claim 
+condition precedent to the admission of Our liability, You shall 
+processing team by calling the toll free number 
+undertake the following:
+1800 2666 or emailing us at a s 
+1.1 Claims Procedure
+customersupport@icicilombard.com specified in 
+  A.  For Cashless Settlement 
+the Policy provided to You and also in writing at 
+    Cashless treatment is only available at a Network  Our address with particulars as below:
+Provider (List of Network Providers is available at our 
+      v  Policy number;
+website). In order to avail of cashless treatment, the 
+      v  Your Name;
+following procedure must be followed by You:
+      v  Your relationship with the Policyholder;
+    Pre-authorization
+      v  Nature of Illness or Injury;
+    Prior to taking treatment and/ or incurring Medical 
+Expenses at a Network Provider, You must contact Us        v  Name and address of the attending Medical 
+or Our in house claim processing team accompanied  Practitioner and the Hospital;
+with full particulars namely, Policy Number, Your name,        v  Any other information that may be relevant to 
+Your relationship with Policy Holder, nature of Illness or  the Illness/ Injury/ Hospitalisation
+Injury, name and address of the Medical Practitioner/ 
+      The above information needs to be provided to Us 
+Hospital and any other information that may be 
+or Our in house claim processing team immediately 
+relevant to the Illness/ Injury/ Hospitalisation. You must 
+and in any event within 10 days of Hospitalization, 
+request preauthorization at least 48 hours before a 
+failing which We will have the right to treat the 
+planned Hospitalization and in case of an emergency 
+Claim as inadmissible, as We may deem fit at Our 
+situation, within 24 hours of Hospitalization. To avail of 
+sole discretion.
+Cashless Hospitalization facility, you are required to 
+    ii.  You must immediately consult a Medical 
+produce the health card, as provided to You with this 
+Practitioner and follow the advice and treatment 
+Policy, subject to the terms and conditions for the 
+that he recommends.
+usage of the said health card Or You can seek pre 
+UIN : ICIHLIP22012V012223 28 CIN: L67200MH2000PLC129408
