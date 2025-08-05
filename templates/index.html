@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Policy Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background: #0066ff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0052cc;
+        }
+
+        .results {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .match {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Insurance Policy Assistant</h1>
+        <div class="search-box">
+            <input type="text" id="query-input" placeholder="Ask about your insurance policy...">
+            <button id="search-btn">Search</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('results').innerHTML = '<div class="loading">Processing your query...</div>';
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<div class="results">';
+            
+            // Display AI Response
+            if (data.ai_response) {
+                html += '<h2>AI Response</h2>';
+                html += '<div class="match">';
+                html += `<p><strong>Decision:</strong> ${data.ai_response.decision}</p>`;
+                html += `<p><strong>Justification:</strong> ${data.ai_response.justification}</p>`;
+                html += `<p><strong>Amount:</strong> ${data.ai_response.amount}</p>`;
+                html += `<p><strong>Next Steps:</strong> ${data.ai_response.next_steps}</p>`;
+                html += '</div>';
+            }
+            
+            // Display Matches
+            if (data.matches && data.matches.length > 0) {
+                html += '<h2>Relevant Policy Information</h2>';
+                data.matches.forEach((match, index) => {
+                    html += '<div class="match">';
+                    html += `<p><strong>Match #${index + 1}</strong> (Score: ${match.score.toFixed(4)})</p>`;
+                    html += `<p><strong>Source:</strong> ${match.source}</p>`;
+                    html += `<p>${match.content}</p>`;
+                    html += '</div>';
+                });
+            }
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        async function queryAPI(query) {
+            showLoading();
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = `
+                    <div class="error">
+                        <h2>Error</h2>
+                        <p>Sorry, an error occurred while processing your request. Please try again.</p>
+                        <p>Error details: ${error.message}</p>
+                        <p>Make sure the backend server is running on http://localhost:5000</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Handle search button click
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const query = document.getElementById('query-input').value;
+            if (query.trim() !== '') {
+                queryAPI(query);
+            }
+        });
+        
+        // Handle Enter key in search input
+        document.getElementById('query-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const query = this.value;
+                if (query.trim() !== '') {
+                    queryAPI(query);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
