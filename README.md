@@ -63,7 +63,7 @@ llm-model/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/policygpt.git
+   git clone https://github.com/ankitrraj/insurance_bot
    cd policygpt
    ```
 
@@ -171,9 +171,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Contact
 
-- **Developer**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [@yourusername]
+- **Developer**: [ankit rajoria]
+- **Email**: [ankitrajoria81@gmail.com]
+- **GitHub**: [@ankitrraj]
 
 ---
 
