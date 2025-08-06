@@ -5,6 +5,7 @@ import google.generativeai as genai
 import numpy as np
 import json
 import os
+import re
 
 app = Flask(__name__)
 
@@ -41,49 +42,42 @@ def get_next_api_key():
     current_key_index = (current_key_index + 1) % len(API_KEYS)
     return key
 
-# Initialize models
-print("🔄 Loading models...")
-try:
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    print("✅ Embedding model loaded")
-    
-    # Configure Gemini model with proper settings
-    generation_config = {
-        "temperature": 0.7,
-        "top_p": 0.8,
-        "top_k": 40,
-    }
-    gemini_model = genai.GenerativeModel("gemini-1.5-pro-latest", generation_config=generation_config)
-    print("✅ Gemini model loaded")
-except Exception as e:
-    print(f"❌ Error loading models: {str(e)}")
-    raise
+# Load all chunks from the chunks directory (from hackrx_full_demo.py)
+print("📂 Loading all chunks from file system...")
+chunks = []
+metadata = []
+chunks_dir = "./chunks"
+for filename in os.listdir(chunks_dir):
+    if filename.endswith(".txt"):
+        file_path = os.path.join(chunks_dir, filename)
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if content:
+                chunks.append(content)
+                metadata.append({"source": filename})
+print(f"✅ Loaded {len(chunks)} chunks from file system")
 
-# Sample insurance policy chunks
-chunks = [
-    "Deductible refers to the fixed amount that the insured person must pay before the insurance company starts covering the expenses. Co-payment is a percentage of the claim amount that the insured person must pay.",
-    "Waiting period: A waiting period is a time period in which you cannot make claims. For example, most health insurance policies have a 30-day waiting period for illnesses.",
-    "Pre-existing diseases: Conditions, ailments, or injuries that existed before the policy was purchased. These may be covered after a waiting period.",
-    "Premium: The amount paid by the policyholder to the insurance company for providing insurance coverage. It can be paid monthly, quarterly, or annually.",
-    "Coverage limit: The maximum amount an insurance company will pay toward a covered loss. Once this limit is reached, the policyholder must pay all additional costs."
-]
+# Load embedding model
+print("🔄 Loading embedding model...")
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+print("✅ Embedding model loaded")
 
-# Pre-compute embeddings once at startup
+# Embed all chunks
+print(f"🔄 Embedding {len(chunks)} chunks... (this may take a moment)")
 chunk_embeddings = embedding_model.encode(chunks)
+print("✅ All chunks embedded successfully")
 
 @app.route('/api/query', methods=['POST'])
 def query():
     try:
-        # Get query from request
         data = request.json
         if not data or 'query' not in data:
             return jsonify({"error": "No query provided"}), 400
-        
         query = data['query']
-        
+
         # Embed query
         query_embedding = embedding_model.encode(query)
-        
+
         # Calculate similarities
         similarities = []
         for chunk_embedding in chunk_embeddings:
@@ -91,70 +85,91 @@ def query():
                 np.linalg.norm(query_embedding) * np.linalg.norm(chunk_embedding)
             ))
             similarities.append(similarity)
-        
-        # Get top matches
-        top_indices = np.argsort(similarities)[::-1][:3]
-        matches = []
-        for idx in top_indices:
-            matches.append({
-                "content": chunks[idx],
-                "score": float(similarities[idx]),
-                "source": f"Policy_Document_{idx+1}.txt"
-            })
-        
-        # Generate AI response
+
+        # Get top 5 most similar chunks
+        top_k = 5
+        top_indices = np.argsort(similarities)[::-1][:top_k]
+        top_chunks = [chunks[i] for i in top_indices]
+        top_metadata = [metadata[i] for i in top_indices]
+        top_scores = [similarities[i] for i in top_indices]
+
+        # Prepare context for the prompt (combine top chunks)
+        context = ""
+        for i, (chunk, meta) in enumerate(zip(top_chunks, top_metadata)):
+            context += f"Clause {i+1} from {meta['source']}:\n{chunk}\n\n"
+
         prompt = f"""
-        Query: {query}
-        
-        Relevant policy information:
-        {' '.join([m['content'] for m in matches])}
-        
-        Please provide a response in this exact JSON format:
-        {{
-            "decision": "Approved/Rejected/Need more info",
-            "justification": "Brief explanation based on policy",
-            "amount": "Amount if applicable, otherwise N/A",
-            "next_steps": "Recommended actions"
-        }}
-        """
-        
+You are an expert insurance policy assistant. Follow this 3-step process to answer the user's query.
+
+1. **Think Step** (simulate internal reasoning): Briefly describe what you're looking for in the policy document, and what criteria will help decide the answer.
+
+2. **Explain to User**: Give a clear explanation in simple, user-friendly language based on the policy details provided.
+
+3. **Structured Output**: Return a final structured answer in JSON format as shown.
+
+---
+Insurance Policy Context:
+{context}
+
+---
+User Question:
+{query}
+
+---
+Expected Final Output Format:
+{{
+  "query": "...",
+  "decision": "Yes/No/Partial/Need more info",
+  "justification": "Based on exact policy section/coverage clause",
+  "amount": "Coverage amount if applicable",
+  "source": "Policy clause or section",
+  "next_steps": "What user should do now"
+}}
+
+Respond in this exact format:
+
+🧠 **Thinking**:
+...
+
+💬 **Explanation**:
+...
+
+📦 **JSON**:
+{{ ... }}
+"""
+
         # Generate response with retry logic and API key rotation
         max_retries = 3
+        ai_response = None
         for attempt in range(max_retries):
             try:
-                # Configure with next API key on retry
                 api_key = get_next_api_key()
                 genai.configure(api_key=api_key)
                 print(f"🔄 Attempt {attempt + 1} with new API key")
-                
+                gemini_model = genai.GenerativeModel("gemini-1.5-flash")
                 response = gemini_model.generate_content(prompt)
-                ai_response = response.text.strip()
-                
-                # Try to parse AI response as JSON
-                try:
-                    ai_response = json.loads(ai_response)
-                    print("✅ Successfully generated response")
-                    break  # If successful, exit the retry loop
-                except json.JSONDecodeError:
-                    print(f"⚠️ Failed to parse JSON response on attempt {attempt + 1}")
-                    if attempt == max_retries - 1:  # If last attempt
-                        print(f"❌ Failed to parse JSON response after {max_retries} attempts")
-                        ai_response = {
-                            "decision": "Need more info",
-                            "justification": "Unable to process model response",
-                            "amount": "N/A",
-                            "next_steps": "Please try again or contact support"
-                        }
+                ai_response_text = response.text.strip()
+                ai_response = ai_response_text
+                print("✅ Successfully got Gemini response")
+                break
             except Exception as e:
                 print(f"❌ Attempt {attempt + 1} failed: {str(e)}")
-                if attempt == max_retries - 1:  # If last attempt
-                    raise
-        
+                if attempt == max_retries - 1:
+                    ai_response = "Sorry, I could not process your request. Please try again or contact support."
+
+        # Prepare matches for frontend
+        matches = []
+        for i, idx in enumerate(top_indices):
+            matches.append({
+                "content": chunks[idx],
+                "score": float(similarities[idx]),
+                "source": metadata[idx]["source"]
+            })
+
         return jsonify({
             "matches": matches,
             "ai_response": ai_response
         })
-        
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500

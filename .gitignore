@@ -32,9 +32,9 @@ chromadb_store/
 *.sqlite3
 *.db
 
-# Large data files
-data/*.txt
-chunks/*.txt
+# Large data files (excluding maindata.txt and its chunks)
+data/doc*.txt
+chunks/doc*.txt_chunk*.txt
 
 # API Keys and sensitive data
 .env
