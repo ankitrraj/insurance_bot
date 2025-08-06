@@ -25,92 +25,36 @@ MANIFEST
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
+
+# Large data files and databases
+chromadb_store/
+*.bin
+*.sqlite3
+*.db
+
+# Large data files
+data/*.txt
+chunks/*.txt
+
+# API Keys and sensitive data
+.env
+*.key
+config.ini
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Logs
 *.log
-logs/
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# API Keys (for security)
-config.py
-secrets.py
-
-# Large files and databases
-*.db
-*.sqlite
-*.sqlite3
 
 # Temporary files
-*.tmp
-*.temp
-temp/
-tmp/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
+tempCodeRunnerFile.py
 
 
