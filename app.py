@@ -216,7 +216,8 @@ if __name__ == '__main__':
     # Initialize the app
     if initialize_app():
         logger.info("🚀 Starting Flask app...")
-        app.run(debug=True, port=5000)
+        port = int(os.environ.get('PORT', 5000))
+        app.run(debug=True, port=port)
     else:
         logger.error("❌ Failed to initialize app. Check logs above.")
         exit(1)
