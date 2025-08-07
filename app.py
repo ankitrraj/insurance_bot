@@ -6,6 +6,7 @@ import os
 import re
 import logging
 import random
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +19,7 @@ DEBUG = True
 FLASK_ENV = 'development'
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
+        "origins": ["http://localhost:5000", "http://127.0.0.1:5000", "https://insurance-bot-49ae.onrender.com"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -31,6 +32,37 @@ def home():
 @app.route('/health')
 def health():
     return jsonify({"status": "ok", "message": "Server is running"})
+
+@app.route('/api/test')
+def test_api():
+    try:
+        return jsonify({
+            "status": "API working", 
+            "chunks_loaded": len(chunks),
+            "metadata_loaded": len(metadata),
+            "timestamp": str(datetime.now()) if 'datetime' in globals() else "N/A"
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/debug')
+def debug_info():
+    try:
+        chunks_dir = "./chunks"
+        chunks_exist = os.path.exists(chunks_dir)
+        chunks_files = []
+        if chunks_exist:
+            chunks_files = [f for f in os.listdir(chunks_dir) if f.endswith('.txt')]
+        
+        return jsonify({
+            "chunks_directory_exists": chunks_exist,
+            "chunks_files_count": len(chunks_files),
+            "chunks_loaded_in_memory": len(chunks),
+            "metadata_loaded_in_memory": len(metadata),
+            "sample_files": chunks_files[:5] if chunks_files else []
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Configure API keys with rotation
 API_KEYS = [
@@ -122,8 +154,17 @@ def query():
             return jsonify({"error": "No query provided"}), 400
         query = data['query']
 
+        # Debug logging
+        logger.info(f"Received query: {query}")
+        logger.info(f"Chunks loaded: {len(chunks)}")
+        logger.info(f"Metadata loaded: {len(metadata)}")
+
         if len(chunks) == 0:
-            return jsonify({"error": "No data loaded"}), 500
+            logger.error("No chunks loaded! Trying to reinitialize...")
+            if not initialize_app():
+                return jsonify({"error": "Failed to load data"}), 500
+            if len(chunks) == 0:
+                return jsonify({"error": "No data available"}), 500
 
         # Get top chunks using simple similarity
         top_results = simple_similarity_search(query, chunks, top_k=5)
