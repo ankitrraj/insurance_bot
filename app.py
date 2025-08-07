@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from sentence_transformers import SentenceTransformer
-import google.generativeai as genai
 import numpy as np
 import json
 import os
 import re
+import logging
+import random
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -42,30 +46,73 @@ def get_next_api_key():
     current_key_index = (current_key_index + 1) % len(API_KEYS)
     return key
 
-# Load all chunks from the chunks directory (from hackrx_full_demo.py)
-print("📂 Loading all chunks from file system...")
+# Global variables for data
 chunks = []
 metadata = []
-chunks_dir = "./chunks"
-for filename in os.listdir(chunks_dir):
-    if filename.endswith(".txt"):
-        file_path = os.path.join(chunks_dir, filename)
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-            if content:
-                chunks.append(content)
-                metadata.append({"source": filename})
-print(f"✅ Loaded {len(chunks)} chunks from file system")
 
-# Load embedding model
-print("🔄 Loading embedding model...")
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-print("✅ Embedding model loaded")
+def initialize_app():
+    """Initialize the app with data"""
+    global chunks, metadata
+    
+    try:
+        # Load all chunks from the chunks directory
+        logger.info("📂 Loading all chunks from file system...")
+        chunks = []
+        metadata = []
+        chunks_dir = "./chunks"
+        
+        if not os.path.exists(chunks_dir):
+            logger.error(f"Chunks directory {chunks_dir} not found!")
+            return False
+            
+        for filename in os.listdir(chunks_dir):
+            if filename.endswith(".txt"):
+                file_path = os.path.join(chunks_dir, filename)
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read().strip()
+                        if content:
+                            chunks.append(content)
+                            metadata.append({"source": filename})
+                except Exception as e:
+                    logger.warning(f"Error reading {filename}: {e}")
+                    continue
+                    
+        logger.info(f"✅ Loaded {len(chunks)} chunks from file system")
+        
+        if len(chunks) == 0:
+            logger.error("No chunks loaded! Check if chunks directory has .txt files")
+            return False
+            
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error in initialization: {e}")
+        return False
 
-# Embed all chunks
-print(f"🔄 Embedding {len(chunks)} chunks... (this may take a moment)")
-chunk_embeddings = embedding_model.encode(chunks)
-print("✅ All chunks embedded successfully")
+def simple_similarity_search(query, chunks, top_k=5):
+    """Simple keyword-based similarity search"""
+    query_lower = query.lower()
+    query_words = set(query_lower.split())
+    
+    scores = []
+    for i, chunk in enumerate(chunks):
+        chunk_lower = chunk.lower()
+        chunk_words = set(chunk_lower.split())
+        
+        # Calculate simple word overlap
+        common_words = query_words.intersection(chunk_words)
+        score = len(common_words) / max(len(query_words), 1)
+        
+        # Bonus for exact phrase matches
+        if query_lower in chunk_lower:
+            score += 0.5
+            
+        scores.append((score, i))
+    
+    # Sort by score and return top_k
+    scores.sort(reverse=True)
+    return scores[:top_k]
 
 @app.route('/api/query', methods=['POST'])
 def query():
@@ -75,28 +122,17 @@ def query():
             return jsonify({"error": "No query provided"}), 400
         query = data['query']
 
-        # Embed query
-        query_embedding = embedding_model.encode(query)
+        if len(chunks) == 0:
+            return jsonify({"error": "No data loaded"}), 500
 
-        # Calculate similarities
-        similarities = []
-        for chunk_embedding in chunk_embeddings:
-            similarity = float(np.dot(query_embedding, chunk_embedding) / (
-                np.linalg.norm(query_embedding) * np.linalg.norm(chunk_embedding)
-            ))
-            similarities.append(similarity)
-
-        # Get top 5 most similar chunks
-        top_k = 5
-        top_indices = np.argsort(similarities)[::-1][:top_k]
-        top_chunks = [chunks[i] for i in top_indices]
-        top_metadata = [metadata[i] for i in top_indices]
-        top_scores = [similarities[i] for i in top_indices]
-
-        # Prepare context for the prompt (combine top chunks)
+        # Get top chunks using simple similarity
+        top_results = simple_similarity_search(query, chunks, top_k=5)
+        
+        # Prepare context for the prompt
         context = ""
-        for i, (chunk, meta) in enumerate(zip(top_chunks, top_metadata)):
-            context += f"Clause {i+1} from {meta['source']}:\n{chunk}\n\n"
+        for i, (score, idx) in enumerate(top_results):
+            if score > 0:  # Only include relevant chunks
+                context += f"Clause {i+1} from {metadata[idx]['source']}:\n{chunks[idx]}\n\n"
 
         prompt = f"""
 You are an expert insurance policy assistant. Follow this 3-step process to answer the user's query.
@@ -144,35 +180,43 @@ Respond in this exact format:
         for attempt in range(max_retries):
             try:
                 api_key = get_next_api_key()
+                import google.generativeai as genai
                 genai.configure(api_key=api_key)
-                print(f"🔄 Attempt {attempt + 1} with new API key")
+                logger.info(f"🔄 Attempt {attempt + 1} with new API key")
                 gemini_model = genai.GenerativeModel("gemini-1.5-flash")
                 response = gemini_model.generate_content(prompt)
                 ai_response_text = response.text.strip()
                 ai_response = ai_response_text
-                print("✅ Successfully got Gemini response")
+                logger.info("✅ Successfully got Gemini response")
                 break
             except Exception as e:
-                print(f"❌ Attempt {attempt + 1} failed: {str(e)}")
+                logger.error(f"❌ Attempt {attempt + 1} failed: {str(e)}")
                 if attempt == max_retries - 1:
                     ai_response = "Sorry, I could not process your request. Please try again or contact support."
 
         # Prepare matches for frontend
         matches = []
-        for i, idx in enumerate(top_indices):
-            matches.append({
-                "content": chunks[idx],
-                "score": float(similarities[idx]),
-                "source": metadata[idx]["source"]
-            })
+        for score, idx in top_results:
+            if score > 0:  # Only include relevant matches
+                matches.append({
+                    "content": chunks[idx],
+                    "score": float(score),
+                    "source": metadata[idx]["source"]
+                })
 
         return jsonify({
             "matches": matches,
             "ai_response": ai_response
         })
     except Exception as e:
-        print(f"Error processing request: {str(e)}")
+        logger.error(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Initialize the app
+    if initialize_app():
+        logger.info("🚀 Starting Flask app...")
+        app.run(debug=True, port=5000)
+    else:
+        logger.error("❌ Failed to initialize app. Check logs above.")
+        exit(1)
